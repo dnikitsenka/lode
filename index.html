@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЛОДЭ · Стратегия развития · Конкурентная разведка</title>
+  <style>
+    /* ============ RESET & BASE ============ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --lode-blue: #005BAA;
+      --lode-blue-dark: #003D73;
+      --lode-blue-deep: #002B52;
+      --lode-green: #00A88F;
+      --lode-green-light: #6DCFC0;
+      --lode-accent: #8DC63F;
+      --bg: #F4F7FB;
+      --bg-card: #FFFFFF;
+      --text: #12263A;
+      --text-muted: #5A7184;
+      --border: #DDE6EF;
+      --shadow: 0 12px 40px rgba(0, 45, 85, 0.08);
+      --shadow-hover: 0 18px 50px rgba(0, 45, 85, 0.14);
+      --radius: 18px;
+      --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ SLIDESHOW SHELL ============ */
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .slides-track {
+      display: flex;
+      height: 100%;
+      transition: transform 0.75s cubic-bezier(0.77, 0, 0.175, 1);
+      will-change: transform;
+    }
+    .slide {
+      flex: 0 0 100vw;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 64px clamp(24px, 5vw, 80px) 96px;
+      position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: var(--lode-blue) transparent;
+    }
+    .slide::-webkit-scrollbar { width: 6px; }
+    .slide::-webkit-scrollbar-thumb { background: var(--lode-blue); border-radius: 10px; }
+
+    /* ============ NAVIGATION ============ */
+    .nav-arrows {
+      position: fixed;
+      bottom: 28px;
+      right: 32px;
+      display: flex;
+      gap: 12px;
+      z-index: 100;
+    }
+    .nav-arrows button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--lode-blue);
+      display: grid;
+      place-items: center;
+      transition: 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .nav-arrows button:hover {
+      background: var(--lode-blue);
+      color: #fff;
+      border-color: var(--lode-blue);
+      transform: translateY(-2px);
+    }
+    .nav-dots {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      padding: 10px 18px;
+      border-radius: 100px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .nav-dots button {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: none;
+      background: #C5D3E0;
+      cursor: pointer;
+      transition: 0.3s ease;
+      padding: 0;
+    }
+    .nav-dots button.active {
+      background: var(--lode-blue);
+      width: 26px;
+      border-radius: 10px;
+    }
+
+    /* ============ TYPOGRAPHY ============ */
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--lode-blue);
+      background: rgba(0, 91, 170, 0.07);
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 22px;
+    }
+    .kicker::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--lode-green);
+    }
+    .slide h1 {
+      font-size: clamp(36px, 5vw, 68px);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--lode-blue-deep);
+    }
+    .slide h2 {
+      font-size: clamp(28px, 3.6vw, 46px);
+      line-height: 1.12;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--lode-blue-deep);
+      margin-bottom: 14px;
+    }
+    .slide h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--lode-blue-deep);
+      margin-bottom: 8px;
+    }
+    .slide p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text-muted);
+      max-width: 760px;
+    }
+    .lead {
+      font-size: clamp(17px, 1.5vw, 21px) !important;
+      color: var(--text) !important;
+      line-height: 1.55 !important;
+    }
+
+    /* ============ LAYOUT HELPERS ============ */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .mt-40 { margin-top: 40px; }
+    .mt-24 { margin-top: 24px; }
+    .mt-16 { margin-top: 16px; }
+    .flex-between { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; }
+    .full { grid-column: 1 / -1; }
+
+    /* ============ CARDS & METRICS ============ */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 28px 26px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-3px);
+    }
+    .metric {
+      font-size: clamp(38px, 4.2vw, 58px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--lode-blue);
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-sm {
+      font-size: clamp(26px, 2.8vw, 36px);
+      font-weight: 800;
+      color: var(--lode-blue);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .metric-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .pill-green { background: rgba(0,168,143,0.12); color: #007A68; }
+    .pill-blue { background: rgba(0,91,170,0.10); color: var(--lode-blue); }
+    .pill-amber { background: rgba(220,140,0,0.12); color: #A66A00; }
+
+    /* ============ PILLARS ============ */
+    .pillar {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 30px 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: 0.3s ease;
+    }
+    .pillar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+    }
+    .pillar:nth-child(1)::after { background: var(--lode-blue); }
+    .pillar:nth-child(2)::after { background: var(--lode-green); }
+    .pillar:nth-child(3)::after { background: var(--lode-accent); }
+    .pillar:nth-child(4)::after { background: var(--lode-blue-dark); }
+    .pillar:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+    .pillar-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+      background: rgba(0,91,170,0.07);
+    }
+    .pillar h3 { font-size: 18px; margin-bottom: 10px; }
+    .pillar p { font-size: 14px; line-height: 1.6; }
+
+    /* ============ COMPETITOR TABLE ============ */
+    .comp-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .comp-table th {
+      background: var(--lode-blue-deep);
+      color: #fff;
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+    }
+    .comp-table td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table tr:nth-child(even) td { background: #F8FBFE; }
+    .comp-table td:first-child { font-weight: 700; color: var(--text); }
+    .comp-table .lode-col { background: rgba(0,91,170,0.045) !important; }
+    .comp-table th.lode-col { background: var(--lode-blue); }
+    .lode-col-color { color: var(--lode-blue-dark); }
+
+    /* ============ MAP ============ */
+    .map-wrap {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      position: relative;
+    }
+    .map-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .map-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-lode { background: var(--lode-blue); }
+    .dot-comp { background: var(--lode-green); }
+    .dot-plan { background: var(--lode-accent); border: 2px dashed #5A9E10; }
+
+    /* ============ CHARTS ============ */
+    .bar-chart { display: flex; flex-direction: column; gap: 14px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; }
+    .bar-label { width: 130px; font-size: 13px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+    .bar-track {
+      flex: 1;
+      height: 12px;
+      background: #E8EEF5;
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+      width: 0;
+    }
+    .bar-value { width: 60px; text-align: right; font-size: 13px; font-weight: 700; color: var(--lode-blue); flex-shrink: 0; }
+
+    .donut-wrap { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+    .donut { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+    .donut svg { transform: rotate(-90deg); }
+    .donut-center {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+      font-size: 26px; font-weight: 800; color: var(--lode-blue-deep);
+    }
+
+    /* ============ GROWTH POINTS ============ */
+    .growth-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 26px 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      position: relative;
+      transition: 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .growth-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+    .growth-num {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1;
+      color: rgba(0,91,170,0.10);
+      margin-bottom: 10px;
+      letter-spacing: -0.04em;
+    }
+    .growth-card h3 { font-size: 17px; margin-bottom: 10px; }
+    .growth-card p { font-size: 13.5px; line-height: 1.55; }
+    .profit-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(0,168,143,0.07);
+      border-radius: 12px;
+      border-left: 3px solid var(--lode-green);
+    }
+    .profit-box strong { display: block; font-size: 12px; color: var(--lode-green); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
+    .profit-box span { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+    /* ============ TIMELINE ============ */
+    .timeline { display: flex; gap: 0; margin-top: 30px; position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 20px; left: 0; right: 0;
+      height: 2px;
+      background: var(--border);
+    }
+    .tl-step { flex: 1; position: relative; padding-top: 48px; padding-right: 18px; }
+    .tl-dot {
+      position: absolute;
+      top: 12px; left: 0;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--lode-blue);
+      border: 3px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--lode-blue);
+      z-index: 1;
+    }
+    .tl-step:nth-child(2) .tl-dot { background: var(--lode-green); box-shadow: 0 0 0 2px var(--lode-green); }
+    .tl-step:nth-child(3) .tl-dot { background: var(--lode-accent); box-shadow: 0 0 0 2px var(--lode-accent); }
+    .tl-step:nth-child(4) .tl-dot { background: var(--lode-blue-dark); box-shadow: 0 0 0 2px var(--lode-blue-dark); }
+    .tl-step h4 { font-size: 14px; font-weight: 700; color: var(--lode-blue-deep); margin-bottom: 6px; }
+    .tl-step p { font-size: 12.5px; line-height: 1.5; color: var(--text-muted); }
+
+    /* ============ REVEAL ANIMATIONS ============ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .slide { padding: 48px 20px 100px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .comp-table { font-size: 11px; }
+      .comp-table th, .comp-table td { padding: 9px 7px; }
+      .nav-dots { display: none; }
+      .timeline { flex-direction: column; gap: 22px; }
+      .timeline::before { display: none; }
+      .tl-step { padding-top: 0; padding-left: 32px; }
+      .tl-dot { top: 2px; left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="slides-track" id="track">
+
+    <!-- ================= SLIDE 1: TITLE ================= -->
+    <section class="slide" data-slide="0">
+      <div style="max-width: 980px; margin: 0 auto; padding-top: 4vh;">
+        <div class="kicker reveal">Конкурентная разведка · Стратегия развития</div>
+        <h1 class="reveal" style="font-size: clamp(40px, 6vw, 80px);">
+          ЛОДЭ.<br>
+          <span style="color: var(--lode-blue);">Стратегия</span><br>
+          устойчивого роста.
+        </h1>
+        <p class="lead reveal" style="margin-top: 26px; max-width: 680px;">
+          Как крупнейшей частной медицинской сети Беларуси перейти от роста «через открытие точек» к архитектуре доступности, которая масштабирует качество, а не проблемы.
+        </p>
+
+        <div class="grid-4 mt-40">
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric">12</div>
+            <div class="metric-label">медицинских центров</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric">1 200+</div>
+            <div class="metric-label">врачей</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric">2 млн</div>
+            <div class="metric-label">обращений в год</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric">60</div>
+            <div class="metric-label">направлений</div>
+          </div>
+        </div>
+
+        <p class="reveal" style="margin-top: 48px; font-size: 13px; color: var(--text-muted); letter-spacing: 0.03em;">
+          Основатель и директор — Владимир Владимирович Горбачёв · 33 года на рынке · с 1992 года
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 2: PROFILE ================= -->
+    <section class="slide" data-slide="1">
+      <div style="max-width: 1100px; margin: 0 auto;">
+        <div class="kicker reveal">Кто мы на рынке</div>
+        <h2 class="reveal">Профиль ЛОДЭ: масштаб, который можно<br>перевести в архитектуру.</h2>
+        <p class="lead reveal" style="margin-bottom: 32px;">
+          Сеть представлена в Минске (6 центров, включая детский, офтальмологический, стоматологический и хирургический со стационаром), а также в Бресте, Гродно, Витебске и Гомеле. Сильные стороны — узнаваемость, оборудование и врачебная база. Уязвимость — размывание стандарта сервиса при масштабе и ценовое давление.
+        </p>
+
+        <div class="grid-3">
+          <div class="card reveal">
+            <span class="pill pill-blue">Минск</span>
+            <h3 style="margin-top: 14px;">6 центров</h3>
+            <p>Независимости 58а · Победителей 133 · Гикало 1 (детский) · Независимости 95 (офтальмология) · Сурганова 39 (стоматология) · Притыцкого 140 (хирургия и стационар)</p>
+          </div>
+          <div class="card reveal">
+            <span class="pill pill-green">Регионы</span>
+            <h3 style="margin-top: 14px;">4 города</h3>
+            <p>Брест (Пионерская 50) · Гродно (Замковая 4) · Витебск (Ленина 11 — открытие) · Гомель (12-й центр, 2025)</p>
+          </div>
+          <div class="card reveal">
+            <span class="pill pill-amber">Экосистема</span>
+            <h3 style="margin-top: 14px;">За пределами клиник</h3>
+            <p>Оздоровительный центр для пожилых в Воложинском районе · Оздоровительный комплекс на Лепельских озёрах · лаборатория (300+ анализов) · МРТ круглосуточно</p>
+          </div>
+        </div>
+
+        <div class="grid-2 mt-24">
+          <div class="card reveal">
+            <h3>Целевая аудитория</h3>
+            <p style="margin-top: 10px;">Семьи с детьми · работающие взрослые 30–50 лет (чекапы, диагностика) · женщины (гинекология, репродукция) · корпоративные клиенты · пациенты из регионов · иностранные граждане.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Ценовые ориентиры</h3>
+            <p style="margin-top: 10px;">Консультация врача — около 66 BYN · МРТ головы — от 155 BYN · УЗИ — 43–141 BYN · годовые программы: женщины — 1 725 BYN, мужчины — 1 709,82 BYN.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 3: MAP ================= -->
+    <section class="slide" data-slide="2">
+      <div style="max-width: 1100px; margin: 0 auto;">
+        <div class="kicker reveal">География и конкуренты</div>
+        <h2 class="reveal">Карта присутствия: где ЛОДЭ уже есть,<br>а где атакуют конкуренты.</h2>
+        <p class="lead reveal" style="margin-bottom: 24px;">
+          Конкуренты концентрируются в Минске, но заходят в разные сегменты: Нордин — в глубину экспертизы, Экомедсервис — в B2B, Инвитро — в спальные районы через лабораторный поток, Мерси — в высокомаржинальные ниши. Планируемые точки ЛОДЭ в спальных районах (Каменная Горка, Серебрянка, Малиновка, Минск-Мир) — ответ на экспансию Инвитро и защита первичного контакта.
+        </p>
+
+        <div class="map-wrap reveal">
+          <svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; display: block;">
+            <!-- Simplified Belarus silhouette -->
+            <path d="M120,180 C180,120 280,100 380,110 C480,120 560,140 620,180 C680,220 720,260 760,300 C780,330 770,370 740,400 C700,440 620,460 540,460 C460,460 380,440 300,420 C220,400 160,370 130,330 C100,290 100,220 120,180 Z"
+                  fill="#E9F1F8" stroke="#C5D8E8" stroke-width="2"/>
+            <!-- Region labels -->
+            <text x="450" y="270" font-family="Inter, sans-serif" font-size="13" fill="#8FA8BE" font-weight="600" text-anchor="middle">БЕЛАРУСЬ</text>
+
+            <!-- === LODE centres (blue) === -->
+            <!-- Minsk cluster -->
+            <circle cx="470" cy="240" r="7" fill="#005BAA" stroke="#fff" stroke-width="2"/>
+            <text x="470" y="222" font-family="Inter, sans-serif" font-size="11" fill="#005BAA" font-weight="700" text-anchor="middle">Минск</text>
+            <!-- Brest -->
+            <circle cx="200" cy="400" r="6" fill="#005BAA" stroke="#fff" stroke-width="2"/>
+            <text x="200" y="388" font-family="Inter, sans-serif" font-size="10" fill="#005BAA" font-weight="600" text-anchor="middle">Брест</text>
+            <!-- Grodno -->
+            <circle cx="180" cy="220" r="6" fill="#005BAA" stroke="#fff" stroke-width="2"/>
+            <text x="180" y="208" font-family="Inter, sans-serif" font-size="10" fill="#005BAA" font-weight="600" text-anchor="middle">Гродно</text>
+            <!-- Vitebsk -->
+            <circle cx="620" cy="170" r="6" fill="#005BAA" stroke="#fff" stroke-width="2"/>
+            <text x="620" y="158" font-family="Inter, sans-serif" font-size="10" fill="#005BAA" font-weight="600" text-anchor="middle">Витебск</text>
+            <!-- Gomel -->
+            <circle cx="640" cy="400" r="6" fill="#005BAA" stroke="#fff" stroke-width="2"/>
+            <text x="640" y="418" font-family="Inter, sans-serif" font-size="10" fill="#005BAA" font-weight="600" text-anchor="middle">Гомель</text>
+
+            <!-- === Competitors (green) === -->
+            <!-- Nordin -->
+            <circle cx="510" cy="230" r="5" fill="#00A88F" stroke="#fff" stroke-width="1.5"/>
+            <text x="522" y="226" font-family="Inter, sans-serif" font-size="9" fill="#00A88F" font-weight="600">Нордин</text>
+            <!-- Ecomedservice -->
+            <circle cx="440" cy="260" r="5" fill="#00A88F" stroke="#fff" stroke-width="1.5"/>
+            <text x="426" y="272" font-family="Inter, sans-serif" font-size="9" fill="#00A88F" font-weight="600">Экомедсервис</text>
+            <!-- Invitro (multiple points, show cluster) -->
+            <circle cx="500" cy="270" r="5" fill="#00A88F" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="520" cy="280" r="4" fill="#00A88F" stroke="#fff" stroke-width="1.5"/>
+            <text x="508" y="292" font-family="Inter, sans-serif" font-size="9" fill="#00A88F" font-weight="600">Инвитро</text>
+            <!-- Mercy -->
+            <circle cx="430" cy="220" r="5" fill="#00A88F" stroke="#fff" stroke-width="1.5"/>
+            <text x="418" y="214" font-family="Inter, sans-serif" font-size="9" fill="#00A88F" font-weight="600">Мерси</text>
+
+            <!-- === Planned LODE points in sleeping districts (dashed green) === -->
+            <circle cx="455" cy="255" r="5" fill="none" stroke="#8DC63F" stroke-width="2" stroke-dasharray="3,2"/>
+            <circle cx="490" cy="255" r="5" fill="none" stroke="#8DC63F" stroke-width="2" stroke-dasharray="3,2"/>
+            <circle cx="475" cy="275" r="5" fill="none" stroke="#8DC63F" stroke-width="2" stroke-dasharray="3,2"/>
+            <text x="455" y="295" font-family="Inter, sans-serif" font-size="9" fill="#5A9E10" font-weight="600">Планы: спальные районы</text>
+
+            <!-- Connections -->
+            <line x1="470" y1="240" x2="200" y2="400" stroke="#005BAA" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.3"/>
+            <line x1="470" y1="240" x2="180" y2="220" stroke="#005BAA" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.3"/>
+            <line x1="470" y1="240" x2="620" y2="170" stroke="#005BAA" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.3"/>
+            <line x1="470" y1="240" x2="640" y2="400" stroke="#005BAA" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.3"/>
+          </svg>
+
+          <div class="map-legend">
+            <span><i class="dot dot-lode"></i> Действующие центры ЛОДЭ</span>
+            <span><i class="dot dot-comp"></i> Конкуренты (Минск)</span>
+            <span><i class="dot dot-plan"></i> Планируемые точки в спальных районах</span>
+          </div>
+        </div>
+
+        <p class="reveal" style="margin-top: 18px; font-size: 12.5px; color: var(--text-muted);">
+          Схема упрощена и отражает стратегическую логику, а не точные географические координаты. Конкуренты: Нордин (Сурганова 47Б), Экомедсервис (Толстого 4), Инвитро (Могилевская 14, Сурганова 88, Скрыганова 4Б), Мерси (Игнатенко 8).
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 4: COMPETITIVE ANALYSIS ================= -->
+    <section class="slide" data-slide="3">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="kicker reveal">Конкурентный анализ</div>
+        <h2 class="reveal">Четыре игрока, которые важны стратегически.</h2>
+        <p class="lead reveal" style="margin-bottom: 26px;">
+          ЛОДЭ выигрывает за счёт охвата и бренда, но проигрывает там, где конкурент предлагает более «заточенную» модель. Если делать рост только через открытие новых точек — масштабируются и сильные, и слабые стороны одновременно.
+        </p>
+
+        <div class="reveal" style="overflow-x: auto;">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="lode-col">ЛОДЭ</th>
+                <th>Нордин</th>
+                <th>Экомедсервис</th>
+                <th>Инвитро</th>
+                <th>Мерси</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Модель</td>
+                <td class="lode-col">Сеть многопрофильных центров + регионы</td>
+                <td>2 клиники, «экосистема» в одном месте</td>
+                <td>Многопрофильный центр с фокусом на B2B</td>
+                <td>Лабораторная сеть → клиника полного цикла</td>
+                <td>Частная клиника с хирургией/косметологией</td>
+              </tr>
+              <tr>
+                <td>Масштаб</td>
+                <td class="lode-col">12 центров, 1 200+ врачей</td>
+                <td>2 клиники, 238 врачей</td>
+                <td>1 крупный центр, сильный B2B-блок</td>
+                <td>61 офис в 20 городах, первая клиника в Минске</td>
+                <td>1 клиника, нишевые направления</td>
+              </tr>
+              <tr>
+                <td>Ключевая стратегия</td>
+                <td class="lode-col">Регионы + технологии + бренд</td>
+                <td>Модернизация через инвестора (3,5 млн BYN), углубление экосистемы</td>
+                <td>Корпоративное обслуживание (экономия до 50% для работодателя)</td>
+                <td>«Шаговая доступность» в спальных районах, интеграция анализов и приёма</td>
+                <td>Хирургия, косметология, нишевые услуги</td>
+              </tr>
+              <tr>
+                <td>Целевая аудитория</td>
+                <td class="lode-col">Семьи, взрослые, регионы, корпораты</td>
+                <td>Постоянные пациенты (85%), корпораты, страховые</td>
+                <td>Работодатели и их сотрудники (B2B2C)</td>
+                <td>Жители спальных районов, семьи с детьми</td>
+                <td>Пациенты хирургического/косметологического профиля</td>
+              </tr>
+              <tr>
+                <td>Сильная сторона</td>
+                <td class="lode-col">Узнаваемость, охват, оборудование</td>
+                <td>Глубина экспертизы, лояльность, «всё в одном месте»</td>
+                <td>Управляемая модель заботы о здоровье коллектива</td>
+                <td>Поток из лабораторного бизнеса, удобная локация</td>
+                <td>Специализация и маржинальность</td>
+              </tr>
+              <tr>
+                <td>Уязвимость</td>
+                <td class="lode-col">Размывание стандарта сервиса при масштабе, цена</td>
+                <td>Зависимость от одного «якорного» корпуса</td>
+                <td>Меньшая известность у физлиц</td>
+                <td>Нет опыта полноцикловой клиники в РБ</td>
+                <td>Ограниченный охват</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card reveal mt-24" style="border-left: 4px solid var(--lode-green);">
+          <p style="font-size: 14.5px; color: var(--text);">
+            <strong>Стратегический вывод:</strong> Можно смещаться от «ещё одного флагмана» к <strong>архитектуре доступа</strong> — комбинации компактных точек рядом, корпоративного канала, нишевых центров экспертизы и цифрового контура. Это защищает от конкурентов, которые атакуют именно те сегменты, где ЛОДЭ пока действует «по инерции масштаба».
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 5: FOUR PILLARS ================= -->
+    <section class="slide" data-slide="4">
+      <div style="max-width: 1100px; margin: 0 auto;">
+        <div class="kicker reveal">Стратегический каркас</div>
+        <h2 class="reveal">Четыре столпа, на которых<br>держится стратегия.</h2>
+        <p class="lead reveal" style="margin-bottom: 30px;">
+          Не «ещё один флагман», а система, в которой качество не размывается масштабом, доступность растёт без потери глубины, а клиентоориентированность становится управляемой метрикой.
+        </p>
+
+        <div class="grid-4">
+          <div class="pillar reveal">
+            <div class="pillar-icon">🛡️</div>
+            <h3>Качество услуг</h3>
+            <p>Стандартизация протоколов на всех точках, контроль врачебных компетенций, аудит сервиса. Качество — не лозунг, а операционная метрика, которая не зависит от локации.</p>
+          </div>
+          <div class="pillar reveal">
+            <div class="pillar-icon">📍</div>
+            <h3>Доступность к клиентам</h3>
+            <p>Компактные центры в спальных районах, телемедицина для регионов, корпоративные каналы. Пациент должен получать первичный контакт там, где ему удобно, а не там, где у сети есть флагман.</p>
+          </div>
+          <div class="pillar reveal">
+            <div class="pillar-icon">📈</div>
+            <h3>Масштабируемость</h3>
+            <p>Партнёрская модель asset-light, тиражируемые форматы, цифровая платформа. Рост выручки без пропорционального роста постоянных затрат и без потери управляемости.</p>
+          </div>
+          <div class="pillar reveal">
+            <div class="pillar-icon">❤️</div>
+            <h3>Клиенты</h3>
+            <p>LTV вместо разовой сделки, приложение как канал удержания, персональные маршруты здоровья. Пациент возвращается не «по рекламе», а потому что система помнит его историю.</p>
+          </div>
+        </div>
+
+        <div class="grid-3 mt-24">
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">NPS → 70+</div>
+            <div class="metric-label">целевой уровень лояльности</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">15–20 тыс.</div>
+            <div class="metric-label">дополнительных обращений в год от формата «рядом»</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">10–15%</div>
+            <div class="metric-label">прирост консолидированной выручки от партнёрской модели</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 6: GROWTH POINTS ================= -->
+    <section class="slide" data-slide="5">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="kicker reveal">Точки роста</div>
+        <h2 class="reveal">Пять направлений с измеримым профитом.</h2>
+        <p class="lead reveal" style="margin-bottom: 28px;">
+          Каждое направление отвечает на конкретную конкурентную угрозу и использует существующую базу ЛОДЭ — без капитальных затрат «с нуля».
+        </p>
+
+        <div class="grid-2" style="gap: 20px;">
+          <div class="growth-card reveal">
+            <div class="growth-num">01</div>
+            <h3>«ЛОДЭ Рядом»: клиники шаговой доступности</h3>
+            <p>2–3 компактных центра (200–400 м²) в спальных районах Минска — Каменная Горка, Серебрянка, Малиновка. Базовый набор: терапевт, педиатр, гинеколог, УЗИ, анализы, вакцинация. Маршрутизация сложных случаев во флагманы.</p>
+            <div class="profit-box">
+              <strong>Профит</strong>
+              <span>15–20 тыс. обращений в год · 20–25% маршрутизация в высокомаржинальные услуги · защита доли рынка от Инвитро.</span>
+            </div>
+          </div>
+
+          <div class="growth-card reveal">
+            <div class="growth-num">02</div>
+            <h3>Корпоративная медицина «под ключ»</h3>
+            <p>Выход за рамки ДМС и профосмотров: ежегодный чекап + персональный «навигатор здоровья» + приоритетная запись + онлайн-мониторинг факторов риска для сотрудников корпоративных клиентов.</p>
+            <div class="profit-box">
+              <strong>Профит</strong>
+              <span>100 компаний × 50 сотрудников × 800 BYN ≈ 4 млн BYN дополнительной выручки · предсказуемость и загрузка в «низкие» месяцы.</span>
+            </div>
+          </div>
+
+          <div class="growth-card reveal">
+            <div class="growth-num">03</div>
+            <h3>Центр экспертизы по репродукции</h3>
+            <p>Выделенный центр полного цикла: диагностика бесплодия, ЭКО, ведение беременности, генетические скрининги, психологическая поддержка, послеродовое сопровождение. Позиционирование — «решение репродуктивной задачи», а не «ещё одна услуга».</p>
+            <div class="profit-box">
+              <strong>Профит</strong>
+              <span>Один из самых высоких средних чеков · высокая лояльность и сарафанное радио · кросс-продажи педиатрии и женского здоровья.</span>
+            </div>
+          </div>
+
+          <div class="growth-card reveal">
+            <div class="growth-num">04</div>
+            <h3>Цифровой контур и телемедицина для регионов</h3>
+            <p>Приложение LODE — не справочник, а канал удержания: медкарта, результаты анализов, напоминания о чекапах и вакцинации, телеконсультации для пациентов из Витебска, Гомеля, Бреста и Гродно.</p>
+            <div class="profit-box">
+              <strong>Профит</strong>
+              <span>Пациенты с приложением возвращаются в 1,5–2 раза чаще · монетизация регионов без CAPEX · данные для точных предложений профилактики.</span>
+            </div>
+          </div>
+
+          <div class="growth-card reveal" style="grid-column: 1 / -1;">
+            <div class="growth-num">05</div>
+            <h3>Партнёрская модель с независимыми врачами и малыми клиниками (asset-light)</h3>
+            <p>Партнёрство с профильными клиниками (косметология, ортопедия, флебология, психотерапия) по модели «бренд + лаборатория + IT + операционное сопровождение». ЛОДЭ даёт поток и стандарты, партнёр — врачей и локацию. Это позволяет закрывать ниши, которые нецелесообразно развивать внутри флагманов, и становиться платформой, а не только оператором.</p>
+            <div class="profit-box">
+              <strong>Профит</strong>
+              <span>10–15% прирост консолидированной выручки при минимальных CAPEX · доступ к новым нишам без длительного лицензирования · усиление лабораторного и диагностического бизнеса.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 7: DYNAMIC METRICS ================= -->
+    <section class="slide" data-slide="6">
+      <div style="max-width: 1100px; margin: 0 auto;">
+        <div class="kicker reveal">Динамика и целевые метрики</div>
+        <h2 class="reveal">Что должно измениться<br>в измеримых показателях.</h2>
+        <p class="lead reveal" style="margin-bottom: 32px;">
+          Целевая динамика по ключевым направлениям на горизонте 24–36 месяцев.
+        </p>
+
+        <div class="grid-2" style="gap: 28px;">
+          <div class="card reveal">
+            <h3 style="margin-bottom: 22px;">Рост выручки по направлениям, %</h3>
+            <div class="bar-chart" id="barChart">
+              <div class="bar-row">
+                <div class="bar-label">Корпоративный канал</div>
+                <div class="bar-track"><div class="bar-fill" data-width="85" style="background: var(--lode-blue);"></div></div>
+                <div class="bar-value">+85%</div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label">Формат «рядом»</div>
+                <div class="bar-track"><div class="bar-fill" data-width="70" style="background: var(--lode-green);"></div></div>
+                <div class="bar-value">+70%</div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label">Репродукция</div>
+                <div class="bar-track"><div class="bar-fill" data-width="55" style="background: var(--lode-accent);"></div></div>
+                <div class="bar-value">+55%</div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label">Партнёрская модель</div>
+                <div class="bar-track"><div class="bar-fill" data-width="40" style="background: var(--lode-blue-dark);"></div></div>
+                <div class="bar-value">+40%</div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label">Телемедицина</div>
+                <div class="bar-track"><div class="bar-fill" data-width="65" style="background: var(--lode-blue); opacity: 0.7;"></div></div>
+                <div class="bar-value">+65%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card reveal">
+            <h3 style="margin-bottom: 18px;">Структура целевого портфеля</h3>
+            <div class="donut-wrap">
+              <div class="donut">
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                  <circle cx="70" cy="70" r="56" fill="none" stroke="#E8EEF5" stroke-width="18"/>
+                  <circle cx="70" cy="70" r="56" fill="none" stroke="#005BAA" stroke-width="18"
+                          stroke-dasharray="158 352" stroke-linecap="round"/>
+                  <circle cx="70" cy="70" r="56" fill="none" stroke="#00A88F" stroke-width="18"
+                          stroke-dasharray="88 352" stroke-dashoffset="-158" stroke-linecap="round"/>
+                  <circle cx="70" cy="70" r="56" fill="none" stroke="#8DC63F" stroke-width="18"
+                          stroke-dasharray="70 352" stroke-dashoffset="-246" stroke-linecap="round"/>
+                </svg>
+                <div class="donut-center">100%</div>
+              </div>
+              <div style="font-size: 13px; line-height: 2; color: var(--text-muted);">
+                <div><i class="dot" style="background: var(--lode-blue);"></i> Флагманы и диагностика — 45%</div>
+                <div><i class="dot" style="background: var(--lode-green);"></i> Новые каналы (B2B, «рядом») — 25%</div>
+                <div><i class="dot" style="background: var(--lode-accent);"></i> Ниши и партнёрства — 20%</div>
+                <div><i class="dot" style="background: #C5D3E0;"></i> Прочее — 10%</div>
+              </div>
+            </div>
+            <p style="margin-top: 18px; font-size: 12.5px;">
+              Целевая структура через 24–36 месяцев: доля новых каналов и ниш растёт без захвата доли конкурентами.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid-4 mt-24">
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">2×</div>
+            <div class="metric-label">частота возврата пациентов с приложением</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">4 млн</div>
+            <div class="metric-label">BYN доп. выручки от B2B-канала</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">3-4</div>
+            <div class="metric-label">новых компактных центра в спальных районах</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">10–15%</div>
+            <div class="metric-label">прирост выручки от партнёрской модели</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 8: ROADMAP ================= -->
+    <section class="slide" data-slide="7">
+      <div style="max-width: 1100px; margin: 0 auto;">
+        <div class="kicker reveal">Дорожная карта</div>
+        <h2 class="reveal">Как это внедрять:<br>от диагностики к масштабированию.</h2>
+        <p class="lead reveal" style="margin-bottom: 16px;">
+          Этапы по плавному масштабированию. Сначала — пилотные проекты и метрики, затем — расширение того, что доказало эффективность.
+        </p>
+
+        <div class="timeline reveal">
+          <div class="tl-step">
+            <div class="tl-dot"></div>
+            <h4>0–3 мес. · Диагностика</h4>
+            <p>Аудит стандартов сервиса по точкам. Запуск панели метрик: NPS, LTV, время до записи, конверсия первичного контакта. Выбор 2 спальных районов для пилота.</p>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot"></div>
+            <h4>3–9 мес. · Пилотные запуски</h4>
+            <p>Открытие 1 компактного центра «рядом». Запуск B2B-продукта с 5–10 корпоративными клиентами. Выделение репродукции в отдельный центр экспертизы. Обновление приложения с телемедициной.</p>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot"></div>
+            <h4>9–18 мес. · Масштабирование</h4>
+            <p>Тиражирование формата «рядом» ещё на 2 района. Расширение корпоративного канала до 50+ компаний. Запуск 2–3 партнёрских направлений (косметология, ортопедия, флебология).</p>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot"></div>
+            <h4>18–36 мес. · Платформа</h4>
+            <p>ЛОДЭ как архитектура доступа: флагманы + компактные точки + B2B + партнёрская сеть + цифровой контур. Целевая структура портфеля достигнута. Региональная экспансия продолжается по модели «рядом».</p>
+          </div>
+        </div>
+
+        <div class="card reveal mt-40" style="background: var(--lode-blue-deep); color: #fff; border: none;">
+          <h3 style="color: #fff; font-size: 22px; margin-bottom: 12px;">Ключевой принцип</h3>
+          <p style="color: rgba(255,255,255,0.82); font-size: 15px; max-width: 860px;">
+            Не «ещё один флагман», а архитектура доступа. Комбинация «компактные центры рядом → корпоративный канал → нишевые центры экспертизы → цифровой контур → партнёрская платформа» даёт рост выручки при контроле затрат и защищает от конкурентов, которые атакуют именно те сегменты, где ЛОДЭ пока действует по инерции масштаба.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 9: CLOSING ================= -->
+    <section class="slide" data-slide="8">
+      <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; justify-content: center; min-height: 80vh;">
+        <div class="kicker reveal">Резюме для собственника</div>
+        <h1 class="reveal" style="font-size: clamp(34px, 5vw, 64px);">
+          Рост через<br>
+          <span style="color: var(--lode-blue);">архитектуру доступа,</span><br>
+          а не через количество точек.
+        </h1>
+        <p class="lead reveal" style="margin-top: 28px; max-width: 660px;">
+          ЛОДЭ силён охватом и брендом. Следующий этап — не масштабировать проблемы вместе с сетью, а построить систему, в которой качество, доступность, масштабируемость и клиентоориентированность работают как единый контур.
+        </p>
+
+        <div class="grid-3 mt-40">
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">33 года</div>
+            <div class="metric-label">репутации, которую нельзя размывать</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">4 столпа</div>
+            <div class="metric-label">единая система принятия решений</div>
+          </div>
+          <div class="card reveal" style="text-align: center;">
+            <div class="metric-sm">5 точек роста</div>
+            <div class="metric-label">с измеримым профитом</div>
+          </div>
+        </div>
+
+        <p class="reveal" style="margin-top: 48px; font-size: 13px; color: var(--text-muted);">
+          Презентацию подготовил Дмитрий Никитенко на основе публичных данных о сети ЛОДЭ, конкурентном окружении и стратегических гипотезах.
+        </p>
+      </div>
+    </section>
+
+  </div><!-- /track -->
+
+  <!-- Navigation -->
+  <div class="nav-dots" id="dots"></div>
+  <div class="nav-arrows">
+    <button id="prevBtn" aria-label="Назад">←</button>
+    <button id="nextBtn" aria-label="Вперёд">→</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const track = document.getElementById('track');
+  const slides = track.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let current = 0;
+  const total = slides.length;
+
+  /* ---- Create dots ---- */
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.setAttribute('aria-label', 'Слайд ' + (i + 1));
+    if (i === 0) dot.classList.add('active');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+  const dots = dotsContainer.querySelectorAll('button');
+
+  /* ---- Navigation ---- */
+  function goTo(index) {
+    if (index < 0) index = 0;
+    if (index >= total) index = total - 1;
+    current = index;
+    track.style.transform = `translateX(-${current * 100}vw)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    revealCurrent();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
+  });
+
+  /* ---- Touch swipe (basic) ---- */
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+  document.addEventListener('touchend', (e) => {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 60) {
+      if (diff < 0) goTo(current + 1);
+      else goTo(current - 1);
+    }
+  }, {passive: true});
+
+  /* ---- Reveal animations ---- */
+  function revealCurrent() {
+    const slide = slides[current];
+    const items = slide.querySelectorAll('.reveal');
+    items.forEach((el, i) => {
+      el.classList.remove('visible');
+      setTimeout(() => el.classList.add('visible'), 80 + i * 70);
+    });
+    // Animate bars when slide with barChart is active
+    if (slide.querySelector('#barChart')) {
+      const fills = slide.querySelectorAll('.bar-fill');
+      fills.forEach(f => {
+        const w = f.getAttribute('data-width');
+        f.style.width = '0%';
+        setTimeout(() => { f.style.width = w + '%'; }, 300);
+      });
+    }
+  }
+
+  /* Initial reveal */
+  setTimeout(revealCurrent, 200);
+})();
+</script>
+</body>
+</html>
